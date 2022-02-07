@@ -1,48 +1,62 @@
-import React, {useState} from 'react'
+import React, {useState, useEffect} from 'react'
 import {AppUI} from './AppUI'
 
-// Test LocalStorage
-// const todos = JSON.stringify([
-//   {text: 'Cortar cebolla', completed: true},
-//   {text: 'Tomar el cursso de intro a React', completed: false},
-//   {text: 'Llorar con la llorona', completed: true},
-//   {text: 'LALALALAA', completed: false},
-// ])
-//
-// localStorage.setItem('TODOS_V1', todos)
-
 function useLocalStorage(itemName, initialValue){
-  const localStorageItem = localStorage.getItem(itemName)
-  let parsedItem
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(false)
+  const [item, setItem] = useState(initialValue)
 
-  if (!localStorageItem) {
-    localStorage.setItem(itemName, JSON.stringify(initialValue))
-    parsedItem = initialValue
-  } else {
-    parsedItem = JSON.parse(localStorageItem)
+  useEffect(() => {
+    try {
+      setTimeout(() => {
+        const localStorageItem = localStorage.getItem(itemName)
+        let parsedItem
 
-  }
+        if (!localStorageItem) {
+          localStorage.setItem(itemName, JSON.stringify(initialValue))
+          parsedItem = initialValue
+        } else {
+          parsedItem = JSON.parse(localStorageItem)
 
-  const [item, setItem] = useState(parsedItem)
+        }
+
+        setItem(parsedItem)
+        setLoading(false)
+      }, 1000)
+    } catch (e) {
+      setError(true)
+    }
+  })
+
   const saveItem = (newItem) => {
-    const stringifiedItem = JSON.stringify(newItem)
-    localStorage.setItem(itemName, stringifiedItem)
-    setItem(newItem)
+    try {
+      const stringifiedItem = JSON.stringify(newItem)
+      localStorage.setItem(itemName, stringifiedItem)
+      setItem(newItem)
+    } catch (e) {
+      setError(true)
+    }
   }
 
-  return [
+  return {
+    error,
+    loading,
     item,
     saveItem
-  ]
+  }
 }
 
 function App(){
-  const [todos, saveTodos] = useLocalStorage('TODOS_V1', [])
+  const {
+    error,
+    loading,
+    item: todos,
+    saveItem: saveTodos
+  } = useLocalStorage('TODOS_V1', [])
   const [searchValue, setSearchValue] = useState('')
   const completedTodos = todos.filter(todo => !!todo.completed).length
   const totalTodos = todos.length
-
-  let searchedTodos = []
+  let searchedTodos
 
   if (!searchValue.length >= 1) {
     searchedTodos = todos
@@ -54,7 +68,6 @@ function App(){
       return todoText.includes(searchedText)
     })
   }
-
 
   const completeTodo = (text) => {
     const todoIndex = todos.findIndex(todo => todo.text === text)
@@ -81,6 +94,8 @@ function App(){
       searchedTodos={searchedTodos}
       completeTodo={completeTodo}
       deleteTodo={deleteTodo}
+      loading={loading}
+      error={error}
     />)
 }
 
