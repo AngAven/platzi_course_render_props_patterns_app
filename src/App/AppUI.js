@@ -1,33 +1,18 @@
-import React from 'react'
+import React, {useContext} from 'react'
+import {TodoContext} from '../TodoContext'
 import {TodoCounter} from '../TodoCounter/TodoCounter'
 import {TodoSearch} from '../TodoSearch/TodoSearch'
 import {TodoList} from '../TodoList/TodoList'
 import {TodoItem} from '../TodoItem/TodoItem'
 import {CreateTodoButton} from '../TodoCreateTodoButton/CreateTodoButton'
 
-const AppUI = (
-  {
-    error,
-    loading,
-    completedTodos,
-    completeTodo,
-    deleteTodo,
-    searchedTodos,
-    totalTodos,
-    searchValue,
-    setSearchValue
-  }) => {
+const AppUI = () => {
+  const {error, loading, searchedTodos, completeTodo, deleteTodo} = useContext(TodoContext)
 
   return (
     <React.Fragment>
-      <TodoCounter
-        completed={completedTodos}
-        total={totalTodos}
-      />
-      <TodoSearch
-        searchValue={searchValue}
-        setSearchValue={setSearchValue}
-      />
+      <TodoCounter/>
+      <TodoSearch/>
 
       <TodoList>
         {error && <p>Hay errores</p>}
